@@ -1,0 +1,15 @@
+[project]
+name = "local-llm-runner"
+version = "0.1.0"
+description = "A self-reflective alignment pipeline using local open-source LLMs"
+authors = [
+  { name="Your Name", email="you@example.com" }
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "requests"
+]
+
+[project.scripts]
+llm-align = "local_llm_runner.main:run_pipeline"
