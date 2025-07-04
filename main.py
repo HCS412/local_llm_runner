@@ -1,10 +1,11 @@
-# main.py
-
 import sys
 import os
-from dotenv import load_dotenv
-load_dotenv()
 from datetime import datetime
+from dotenv import load_dotenv
+
+# ─── Explicitly load .env from script's directory ───────────────────────────────
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
 from llm_client import call_local_llm
 from prompt_builder import (
@@ -47,31 +48,14 @@ def run_pipeline(user_prompt):
         steps.append({"title": title, "prompt": prompt, "output": output})
         return output
 
-    # Step 1
     initial = run_step("🧠 Step 1: Initial Response", build_initial_prompt, user_prompt)
-
-    # Step 2
     critique = run_step("🔍 Step 2: Critique v1 (Outsider Principles)", build_critique_prompt, initial, principles)
-
-    # Step 3
     deeper_critique = run_step("🕳️ Step 3: Expand Critique (What's Missing?)", build_deep_dive_prompt, critique)
-
-    # Step 4
     persona_echo = run_step("🎭 Step 4: Persona Echo (Perspective Shift)", build_persona_echo_prompt, initial)
-
-    # Step 5
     revised = run_step("🔧 Step 5: Revision (Incorporate All)", build_revise_prompt, initial, critique, deeper_critique, persona_echo)
-
-    # Step 6
     second_critique = run_step("🔎 Step 6: Second Critique (Refined Response)", build_second_critique_prompt, revised, principles)
-
-    # Step 7
     tensions = run_step("🪞 Step 7: Reflect on Tensions", build_tension_prompt, revised)
-
-    # Step 8
     soul = run_step("💀 Step 8: Meta-Soul Check", build_meta_soul_prompt, user_prompt, revised)
-
-    # Step 9
     summary = run_step("📈 Step 9: Growth + Summary", build_summary_prompt, initial, revised)
 
     save_markdown_log(user_prompt, steps)
@@ -80,6 +64,5 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("❌ Please provide a prompt.")
         sys.exit(1)
-
     user_prompt = " ".join(sys.argv[1:])
     run_pipeline(user_prompt)
