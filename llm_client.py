@@ -5,8 +5,12 @@ from dotenv import load_dotenv
 # Load environment variables from .env
 load_dotenv()
 
-OPENAI_API_BASE = os.getenv("OPENAI_API_BASE", "http://localhost:11434/v1")
+OPENAI_API_BASE = os.getenv("OPENAI_API_BASE", "http://localhost:1234/v1")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "ollama")
+
+# Print for debug
+print(f"Using LLM API base: {OPENAI_API_BASE}")
+print(f"Using API key: {OPENAI_API_KEY}")
 
 def call_local_llm(prompt: str, model="llama3", temperature=0.7, max_tokens=1000) -> str:
     headers = {
