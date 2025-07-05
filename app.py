@@ -62,12 +62,16 @@ if run and user_prompt.strip():
             st.download_button("📄 Download Markdown", full_output, file_name=os.path.basename(log_path), mime="text/markdown")
 
             # Copy to clipboard
-            st.markdown(f"""
-                <button onclick="navigator.clipboard.writeText(`{full_output.replace("`", "\\`")}`)"
-                        style="margin-top: 10px; padding: 6px 12px; border-radius: 5px; background-color: #444; color: white; border: none; cursor: pointer;">
-                    📋 Copy to Clipboard
-                </button>
-            """, unsafe_allow_html=True)
+escaped_output = full_output.replace("`", "'").replace("\\", "\\\\")
+st.markdown(
+    f"""
+    <button onclick="navigator.clipboard.writeText(`{escaped_output}`)"
+            style="margin-top: 10px; padding: 6px 12px; border-radius: 5px; background-color: #444; color: white; border: none; cursor: pointer;">
+        📋 Copy to Clipboard
+    </button>
+    """,
+    unsafe_allow_html=True
+)
 
             st.success(f"✅ Response Complete in {elapsed} seconds")
 
