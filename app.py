@@ -26,30 +26,26 @@ if run and user_prompt.strip():
 
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
-        current_step = None
-        captured_output = []
-
+        current_step = ""
         for line in process.stdout:
             line = line.strip()
 
-            if line.startswith("✦ "):  # Step header
-                current_step = line[2:]
-                output_container.markdown(f"🧠 <b>{current_step}</b>", unsafe_allow_html=True)
+            if line.startswith("✦ "):
+                current_step = line.replace("✦ ", "").strip()
+                output_container.markdown(f"⏳ <b>{current_step}</b>", unsafe_allow_html=True)
 
-            elif line.endswith("[Truncated]"):
-                captured_output.append(f"\n\n#### {current_step}\n```\n{line.replace('[Truncated]', '').strip()}\n```")
-                output_container.empty()  # Clear spinner text after step completes
-
-            elif line != "":
-                # For final response-like lines
+            elif line:
+                # Show each step response in collapsible sections
                 if current_step:
-                    st.markdown(f"**{current_step}**\n\n```\n{line}\n```")
-                    current_step = None  # Only show once
+                    st.markdown(
+                        f"<details><summary><b>{current_step}</b></summary><pre>{line}</pre></details>",
+                        unsafe_allow_html=True
+                    )
+                    current_step = ""  # Reset after showing
 
         process.wait()
-        st.success("✅ Done!")
+        output_container.markdown("✅ <b>Response Complete!</b>", unsafe_allow_html=True)
 
-        # Markdown Download
         if os.path.exists(log_path):
             with open(log_path, "rb") as f:
                 st.download_button("📄 Download Full Output", f, file_name=os.path.basename(log_path), mime="text/markdown")
