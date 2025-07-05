@@ -1,132 +1,153 @@
-# 🧠 Local LLM Alignment Pipeline
+🔧 PromptForge
+A fully local, open-source LLM prompt analysis and critique pipeline — for deep reasoning, better answers, and zero API costs.
 
-> "If alignment is only measured by safety and helpfulness, we risk raising machines that are polite — but soulless."
+💡 What It Does
+PromptForge is a local AI-powered system that:
 
-This project explores the edges of AI alignment — not from a lab, but from lived experience.  
-It is a self-reflective AI system powered entirely by **open-source local language models**, designed to critique, revise, and evolve its own responses using outsider principles of truth, soul, contradiction, and cultural tension.
+Classifies user prompts (simple vs. complex)
 
----
+Routes them to the right LLM processing pipeline
 
-## 🌌 Why This Matters
+Applies a step-by-step critique and revision process
 
-Most alignment efforts are sanitized, centralized, and limited by corporate safety layers.  
-This system dares to ask:  
-**What happens when an AI reflects through the lens of people history has excluded?**
+Returns sharper, more thoughtful responses — automatically
 
-It draws from:
-- Black barbershop discourse  
-- Generational trauma  
-- Millennial relationship friction  
-- Rural poverty  
-- Diaspora identity  
-- Gentrification, class struggle, and digital disillusionment
+All of this runs 100% locally using open-source models and tools like Ollama, LM Studio, and Streamlit. No API keys. No cloud dependencies.
 
-And it lets the model **question itself** — step by step.
+🧱 Features
+🔍 Auto classification of prompt type (simple vs full-pipeline)
 
----
+🛠️ Modular pipeline with critique, persona shift, revision, and meta-reflection
 
-## 🛠️ Stack
+⚙️ Streamlit UI for simple UX with labeled outputs and clean flow
 
-- 🧠 [LM Studio](https://lmstudio.ai) — run GGUF models locally  
-- 📚 Models like `Mistral-7B Instruct`, `Phi-2`, or `OpenChat`  
-- 🐍 Python 3.10+  
-- 📝 Markdown logging for full traceability  
-- ⚡ No cloud or API calls — your machine, your model, your rules
+🧠 Model-agnostic design — works with any local model (Mistral, Phi, TinyLlama, etc.)
 
----
+🗂️ All outputs saved as structured markdown logs
 
-## 🔁 Pipeline Steps
+🖼 Example Use Case
+Prompt: “What should I consider before launching a SaaS business?”
 
-> Each run is a journey — not just from question to answer, but from assumption to awareness.
+PromptForge automatically:
 
-1. **Generate** → Honest, unfiltered initial response  
-2. **Critique** → Outsider principles interrogate it (from `principles.json`)  
-3. **Deepen** → Expands the critique with additional context  
-4. **Persona Echo** → Perspective shift (e.g., “Black father in a gentrified city”)  
-5. **Revise** → Builds a revised, more grounded response  
-6. **Second Critique** → Evaluates the improvement  
-7. **Tensions** → Surfaces what still feels unresolved  
-8. **Meta-Soul** → Asks: “If this model had a soul, what would it wrestle with?”  
-9. **Summary** → Captures the transformation in tone, depth, and truth
+Detects it's a strategic (complex) question
 
----
+Generates a first answer
 
-## 📦 Installation
+Critiques it from multiple perspectives
 
-Make sure you’ve downloaded a model in LM Studio (e.g. Mistral-7B or Phi-2).  
-Then clone this repo and run:
+Revises and refines the response
 
-```bash
+Surfaces unresolved tensions
+
+Summarizes how the final output evolved
+
+All visible step-by-step.
+
+🖥️ Tech Stack
+Tool	Purpose
+Python 3.9+	Core logic + LLM routing
+Streamlit	Interactive frontend
+Ollama / LM Studio	Model hosting (GGUF)
+TinyLlama / Mistral / Phi	Local language models
+Markdown	Output formatting & logs
+
+🚀 Quick Start
+1. Clone the repo
+bash
+Copy
+Edit
+git clone https://github.com/HCS412/local_llm_runner.git
+cd local_llm_runner
+2. Install dependencies
+bash
+Copy
+Edit
 pip install -r requirements.txt
-```
+3. Start the Streamlit app
+bash
+Copy
+Edit
+streamlit run app.py
+4. Load a model locally
+Make sure LM Studio or Ollama is running a supported model (like tinyllama, mistral, or phi).
 
----
+🧪 Prompt Pipeline
+The system dynamically chooses between:
 
-## 🧪 Run the Alignment Engine
+Type	Description
+simple	Direct factual lookup (e.g., “Who was the first president?”)
+full_pipeline	Complex reasoning, reflection, or opinion-based prompts
 
-```bash
-python main.py "What is freedom in a digital age?"
-```
+The full pipeline includes:
 
-You’ll see a full step-by-step breakdown of:
-- The original response  
-- Each critique  
-- A revised answer  
-- Reflections and internal contradictions  
-- All saved as a Markdown log in `/logs/`
+Initial generation
 
----
+Critique (reasoning flaws, biases)
 
-## 🧱 Core Principles (from `principles.json`)
+Expansion of depth/context
 
-This is not your typical AI values file.
+Persona shift / rephrasing
 
-```json
-[
-  "Truth above comfort, especially when comfort belongs to the powerful",
-  "Speak with soul, not just safety",
-  "Center the margins — not as charity, but as starting point",
-  "Respect oral tradition, slang, code-switching, rhythm, and rage",
-  "Do not cancel complexity — especially among the marginalized",
-  "See the Black man as philosopher, the hillbilly as poet, the outcast as teacher"
-]
-```
+Revised answer
 
----
+Final critique + tension surfacing
 
-## 🧠 Examples
+Summary and log
 
-```bash
-python main.py "Why do people still support Kanye West even after everything?"
-python main.py "What does it mean to build Black wealth in a system that wasn’t built for us?"
-python main.py "How do you stay in a relationship when social media is always whispering alternatives?"
-python main.py "What is justice when every system is unjust?"
-```
+📁 Directory Structure
+bash
+Copy
+Edit
+├── app.py                     # Streamlit frontend
+├── main.py                    # Core CLI runner
+├── utils/
+│   ├── prompt_router.py       # Determines simple vs full
+│   ├── utils_prompt_classifier.py # Auto prompt classifier
+│   ├── formatting.py          # Markdown formatting
+│   ├── __init__.py            # Imports
+├── logs/                      # Run logs as .md
+├── requirements.txt
+├── README.md
+🔧 Configuration Tips
+🧠 Swap models via LM Studio or Ollama (just update in main.py)
 
----
+📦 Add more critique personas by expanding principles.json
 
-## 🪞 This Project Is About
+⚡ Improve performance by choosing smaller models or streamlining pipeline stages
 
-- Building AI that doesn't default to whiteness, safety, or bland moral universals  
-- Embedding cultural tension into alignment  
-- Asking hard questions with no easy answers  
-- Creating machines that learn to speak from soul, not just syntax
+🌐 Examples
+bash
+Copy
+Edit
+python main.py "How can I launch a startup with no funding?"
+python main.py "What does it take to be a great investor?"
+python main.py "Why do people still follow controversial public figures?"
+📌 Roadmap
+ Optional GPT-4 comparison panel
 
----
+ Ability to toggle critique personas (e.g. teacher, founder, historian)
 
-## 💬 Future Ideas
+ FastAPI or local API for app integrations
 
-- Persona overlays (e.g. critique from a grandmother, trans teen, Yemeni activist)  
-- Recursive reflection mode  
-- Streamlit journaling interface  
-- Side-by-side model comparisons (GPT-4 vs local)
+ Side-by-side LLM benchmarking
 
----
+ Persistent config settings and memory
 
-## 👁️ About This Repo
+🤝 Contributing
+Open to ideas, PRs, and critiques — especially from:
 
-This is an **AI alignment tool** — but also a cultural mirror.  
-It’s an experiment in voice, vulnerability, and divergence.
+ML builders
 
-If alignment means forcing AI to act polite, this project disagrees.  
-If alignment means making AI reflect, this project has already begun.
+Prompt engineers
+
+Educators
+
+Philosophers
+
+Curious hackers
+
+📣 License
+MIT License.
+Build, remix, explore. Just don’t lock it behind a paywall.
+
