@@ -1,22 +1,26 @@
 import streamlit as st
 import subprocess
 import os
+import sys
 import time
 import re
 from datetime import datetime
 
-from utils_prompt_classifier import classify_prompt
-from local_llm_runner.run_llm import run_llm
+# ─── Add local directory to Python path ───────────────────
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# ─── Config ───────────────────────────────────────────────
+# ─── Local Imports ────────────────────────────────────────
+from run_llm import run_llm
+from utils_prompt_classifier import classify_prompt
+
+# ─── Streamlit Page Config ────────────────────────────────
 st.set_page_config(page_title="PromptForge", layout="centered")
 
-# ─── Header ───────────────────────────────────────────────
 st.markdown("<h1 style='text-align: center;'>🛠️ PromptForge</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center;'>Sharp, clear, adaptive AI reasoning.</p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# ─── Session State for Follow-Up Autofill ────────────────
+# ─── Session State ────────────────────────────────────────
 if "autofill_prompt" not in st.session_state:
     st.session_state.autofill_prompt = ""
 
@@ -24,14 +28,14 @@ if "autofill_prompt" not in st.session_state:
 user_prompt = st.text_area("💬 Ask Anything:", height=140, placeholder="e.g. Best taco recipe? Or how to optimize SQL queries?")
 run = st.button("🚀 Run")
 
-# ─── Run Pipeline ─────────────────────────────────────────
+# ─── Run Logic ────────────────────────────────────────────
 if run and user_prompt.strip():
     with st.spinner("⏳ Working on your prompt..."):
         start_time = time.time()
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         log_path = f"logs/run_{timestamp}.md"
 
-        # 🧠 Classify prompt using LLM
+        # 🧠 Classify prompt using TinyLLaMA
         with st.expander("🧠 Prompt Type (Auto-Classified)", expanded=False):
             try:
                 prompt_type = classify_prompt(user_prompt, run_llm)
@@ -40,7 +44,7 @@ if run and user_prompt.strip():
                 st.error(f"Prompt classification failed: {e}")
                 prompt_type = "default"
 
-        # ─── Call CLI pipeline ─────────────────────────────
+        # 🔧 Call the main.py subprocess
         command = f'python3 main.py "{user_prompt}"'
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
