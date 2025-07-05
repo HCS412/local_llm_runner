@@ -31,7 +31,7 @@ if run and user_prompt.strip():
 
         # 🧠 Classify prompt and show it
         with st.expander("🧠 Prompt Type (Auto-Classified)", expanded=False):
-            prompt_type = classify_prompt(user_prompt)
+            prompt_type = classify_prompt(user_prompt, run_llm)
             st.markdown(f"Detected: **{prompt_type}**")
 
         command = f'python3 main.py "{user_prompt}"'
