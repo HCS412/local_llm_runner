@@ -4,7 +4,7 @@ import os
 import time
 import re
 from datetime import datetime
-from local_llm_runner.utils_prompt_classifier import classify_prompt  # 🧠 New import
+from utils_prompt_classifier import classify_prompt
 
 # ─── Config ───────────────────────────────────────────────
 st.set_page_config(page_title="PromptForge", layout="centered")
