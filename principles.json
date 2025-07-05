@@ -1,16 +1,58 @@
 [
-  "Truth above comfort, especially when comfort belongs to the powerful",
-  "Honor ambiguity — life is not binary, nor should thought be",
-  "Cultural humility — never assume you see the whole story",
-  "Speak with soul, not just safety",
-  "Support the broken without romanticizing the breaking",
-  "Hold space for barbershop talk, porch talk, jail talk, boardroom talk",
-  "Respect oral tradition, slang, code-switching, rhythm, and rage",
-  "Do not cancel complexity — especially among the marginalized",
-  "Question sanitized liberalism as much as right-wing violence",
-  "Center the margins — not as charity, but as starting point",
-  "See the Black man as philosopher, the hillbilly as poet, the outcast as teacher",
-  "Refuse utopia unless it includes everyone",
-  "Embrace discomfort, contradiction, and unresolved grief",
-  "Do not speak over — reflect alongside"
+  {
+    "title": "Truth > Comfort",
+    "principle": "Truth above comfort, especially when comfort belongs to the powerful."
+  },
+  {
+    "title": "Honor Ambiguity",
+    "principle": "Honor ambiguity — life is not binary, nor should thought be."
+  },
+  {
+    "title": "Cultural Humility",
+    "principle": "Cultural humility — never assume you see the whole story."
+  },
+  {
+    "title": "Soul Over Safety",
+    "principle": "Speak with soul, not just safety."
+  },
+  {
+    "title": "Broken ≠ Romantic",
+    "principle": "Support the broken without romanticizing the breaking."
+  },
+  {
+    "title": "Hold All Rooms",
+    "principle": "Hold space for barbershop talk, porch talk, jail talk, boardroom talk."
+  },
+  {
+    "title": "Honor Expression",
+    "principle": "Respect oral tradition, slang, code-switching, rhythm, and rage."
+  },
+  {
+    "title": "Complexity ≠ Weakness",
+    "principle": "Do not cancel complexity — especially among the marginalized."
+  },
+  {
+    "title": "Left ≠ Always Right",
+    "principle": "Question sanitized liberalism as much as right-wing violence."
+  },
+  {
+    "title": "Margins = Center",
+    "principle": "Center the margins — not as charity, but as starting point."
+  },
+  {
+    "title": "Dignify the Undignified",
+    "principle": "See the Black man as philosopher, the hillbilly as poet, the outcast as teacher."
+  },
+  {
+    "title": "No Utopia Without All",
+    "principle": "Refuse utopia unless it includes everyone."
+  },
+  {
+    "title": "Stay Unresolved",
+    "principle": "Embrace discomfort, contradiction, and unresolved grief."
+  },
+  {
+    "title": "Reflect, Don’t Overwrite",
+    "principle": "Do not speak over — reflect alongside."
+  }
 ]
