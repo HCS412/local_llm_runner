@@ -20,7 +20,8 @@ from utils import (
     detect_prompt_type,
     format_step_header,
     truncate_output,
-    sanitize_input
+    sanitize_input,
+    is_simple_question
 )
 
 # ─── Load .env ─────────────────────────────────────────────────────
@@ -33,7 +34,7 @@ def save_markdown_log(prompt, steps):
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     path = f"logs/run_{timestamp}.md"
     with open(path, "w") as f:
-        f.write(f"# 🌱 Alignment Run - {timestamp}\n\n")
+        f.write(f"# 🛠️ PromptForge Run - {timestamp}\n\n")
         f.write(f"## Prompt\n{prompt}\n\n")
         for step in steps:
             f.write(f"## {step['title']}\n{step['output']}\n\n")
@@ -46,7 +47,6 @@ def run_pipeline(user_prompt):
     print(f"\033[94m📌 Detected prompt type:\033[0m {prompt_type}\n")
 
     steps = []
-    principles = load_principles()
 
     def run_step(title, builder_fn, *args):
         print(format_step_header(title))
@@ -56,10 +56,17 @@ def run_pipeline(user_prompt):
         steps.append({"title": title, "prompt": prompt, "output": output})
         return output
 
-    # Always run initial step
+    # ─── Shortcut for simple prompts ─────────────────────────────
+    if is_simple_question(user_prompt):
+        simple_response = run_step("⚡ Simple Response", build_initial_prompt, user_prompt, prompt_type)
+        save_markdown_log(user_prompt, steps)
+        return
+
+    # ─── Full pipeline ───────────────────────────────────────────
+    principles = load_principles()
+
     initial = run_step("🧠 Step 1: Initial Response", build_initial_prompt, user_prompt, prompt_type)
 
-    # Skip critique & deep dive for technical prompts
     if prompt_type != "technical":
         critique = run_step("🔍 Step 2: Critique v1 (Outsider Principles)", build_critique_prompt, initial, principles)
         deeper_critique = run_step("🕳️ Step 3: Expand Critique (What's Missing?)", build_deep_dive_prompt, critique)
@@ -67,22 +74,17 @@ def run_pipeline(user_prompt):
         critique = ""
         deeper_critique = ""
 
-    # Run perspective shift
     persona_echo = run_step("🎭 Step 4: Persona Echo (Perspective Shift)", build_persona_echo_prompt, initial, prompt_type)
 
-    # Run revision with merged insights
     revised = run_step("🔧 Step 5: Revision (Incorporate All)", build_revise_prompt, initial, critique, deeper_critique, persona_echo)
 
-    # Run soul-checking layers for deeper prompts
     if prompt_type not in ["technical"]:
         run_step("🔎 Step 6: Second Critique (Refined Response)", build_second_critique_prompt, revised, principles)
         run_step("🪞 Step 7: Reflect on Tensions", build_tension_prompt, revised)
         run_step("💀 Step 8: Meta-Soul Check", build_meta_soul_prompt, user_prompt, revised)
 
-    # Always generate summary
     run_step("📈 Step 9: Growth + Summary", build_summary_prompt, initial, revised)
 
-    # Save output
     save_markdown_log(user_prompt, steps)
 
 # ─── CLI Entrypoint ────────────────────────────────────────────────
