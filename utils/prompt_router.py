@@ -1,4 +1,31 @@
-# utils/prompt_router.py
+import re
+
+def is_simple_question(prompt: str) -> bool:
+    """
+    Determines if the prompt is a simple, factual question.
+    """
+    prompt = prompt.lower().strip()
+    simple_patterns = [
+        r"^what\s+is\s+\w+",
+        r"^who\s+is\s+\w+",
+        r"^define\s+\w+",
+        r"^how\s+do\s+i\s+\w+",
+        r"^can\s+you\s+\w+",
+        r"^does\s+\w+",
+        r"^is\s+\w+",
+        r"^when\s+\w+",
+        r"^where\s+\w+"
+    ]
+    return any(re.search(pattern, prompt) for pattern in simple_patterns)
+
+
+def suggest_followup(prompt: str) -> str:
+    """
+    Suggests a basic follow-up question for simple queries.
+    You can later improve this with NLP or embeddings.
+    """
+    return "Would you like to go deeper on this topic or explore related ideas?"
+
 
 def route_prompt(prompt: str, prompt_type: str) -> str:
     """
@@ -11,7 +38,6 @@ def route_prompt(prompt: str, prompt_type: str) -> str:
     Returns:
         str: "simple" or "full_pipeline"
     """
-
     # Normalize prompt
     prompt = prompt.lower().strip()
 
