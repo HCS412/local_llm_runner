@@ -2,9 +2,7 @@ import os
 import requests
 from dotenv import load_dotenv
 
-# ──────────────────────────────────────────────────────────────────────
-# Load .env configuration from script's directory
-# ──────────────────────────────────────────────────────────────────────
+# ─── Load .env from local directory ─────────────────────────────────
 dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
 env_loaded = load_dotenv(dotenv_path)
 
@@ -19,9 +17,7 @@ if os.path.exists(dotenv_path):
 else:
     print("❌ .env not found at expected path.")
 
-# ──────────────────────────────────────────────────────────────────────
-# Load API configuration
-# ──────────────────────────────────────────────────────────────────────
+# ─── API Config ─────────────────────────────────────────────────────
 OPENAI_API_BASE = os.getenv("OPENAI_API_BASE", "http://localhost:1234/v1")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "ollama")
 
@@ -35,20 +31,29 @@ try:
 except Exception as e:
     print(f"❌ LLM unreachable: {e}")
 
-# ──────────────────────────────────────────────────────────────────────
-# System prompt templates by mode
-# ──────────────────────────────────────────────────────────────────────
+# ─── Determine prompt type ──────────────────────────────────────────
+def classify_prompt_type(prompt: str) -> str:
+    lowered = prompt.lower()
+    if any(word in lowered for word in ["build", "design", "code", "implement", "api", "database", "python", "algorithm"]):
+        return "technical"
+    elif any(word in lowered for word in ["justice", "race", "gender", "equity", "identity", "culture", "marginalized"]):
+        return "social"
+    elif any(word in lowered for word in ["startup", "founder", "investor", "fund", "venture", "capital", "business"]):
+        return "venture"
+    return "default"
+
+# ─── Map system prompts by type ─────────────────────────────────────
 SYSTEM_PROMPTS = {
-    "soulful": "You are a soulful, honest, outsider-aware assistant that speaks from experience and reflection.",
-    "strategic": "You are a sharp, practical, and high-signal strategist. Prioritize clarity, brevity, and real-world execution.",
-    "neutral": "You are a helpful and insightful assistant who communicates clearly and concisely."
+    "technical": "You are a precise, efficient technical assistant who gives clean, useful code and answers.",
+    "social": "You are a soulful, reflective, and honest voice that challenges power with empathy and insight.",
+    "venture": "You are a sharp, contrarian thinker who understands startups, capital flows, and edge.",
+    "default": "You are thoughtful and clear, focused on delivering truth and reflection from many angles."
 }
 
-# ──────────────────────────────────────────────────────────────────────
-# Call Local LLM
-# ──────────────────────────────────────────────────────────────────────
-def call_local_llm(prompt: str, model="llama3", temperature=0.7, max_tokens=500, mode="neutral") -> str:
-    system_prompt = SYSTEM_PROMPTS.get(mode, SYSTEM_PROMPTS["neutral"])
+# ─── LLM Client Function ────────────────────────────────────────────
+def call_local_llm(prompt: str, model="llama3", temperature=0.7, max_tokens=500) -> str:
+    prompt_type = classify_prompt_type(prompt)
+    system_prompt = SYSTEM_PROMPTS[prompt_type]
 
     headers = {
         "Content-Type": "application/json",
@@ -58,29 +63,23 @@ def call_local_llm(prompt: str, model="llama3", temperature=0.7, max_tokens=500,
     payload = {
         "model": model,
         "messages": [
-            { "role": "system", "content": system_prompt },
-            { "role": "user", "content": prompt }
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt}
         ],
         "temperature": temperature,
         "max_tokens": max_tokens
     }
 
-    print("\n📡 Sending to LLM:")
-    print(f"🔸 POST → {OPENAI_API_BASE}/chat/completions")
-    print(f"🔸 Model: {model}")
-    print(f"🔸 Max Tokens: {max_tokens}")
-    print(f"🔸 Mode: {mode}")
-    print(f"🔸 System Prompt: {system_prompt[:80]}...")
+    print(f"\n📡 Sending → {prompt_type.upper()} | {model} | {max_tokens} tokens")
+    print(f"🔸 System Prompt:\n{system_prompt[:100]}...")
 
     try:
         response = requests.post(f"{OPENAI_API_BASE}/chat/completions", headers=headers, json=payload)
         response.raise_for_status()
 
         content = response.json()["choices"][0]["message"]["content"].strip()
-
         preview = content[:500] + ("... [Truncated]" if len(content) > 500 else "")
-        print("\n📨 Response Preview:")
-        print(preview)
+        print("\n📨 Response Preview:\n" + preview)
 
         return content
 
