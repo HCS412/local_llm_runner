@@ -4,7 +4,9 @@ import os
 import time
 import re
 from datetime import datetime
+
 from utils_prompt_classifier import classify_prompt
+from local_llm_runner.run_llm import run_llm
 
 # ─── Config ───────────────────────────────────────────────
 st.set_page_config(page_title="PromptForge", layout="centered")
@@ -29,11 +31,16 @@ if run and user_prompt.strip():
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         log_path = f"logs/run_{timestamp}.md"
 
-        # 🧠 Classify prompt and show it
+        # 🧠 Classify prompt using LLM
         with st.expander("🧠 Prompt Type (Auto-Classified)", expanded=False):
-            prompt_type = classify_prompt(user_prompt, run_llm)
-            st.markdown(f"Detected: **{prompt_type}**")
+            try:
+                prompt_type = classify_prompt(user_prompt, run_llm)
+                st.markdown(f"Detected: **{prompt_type}**")
+            except Exception as e:
+                st.error(f"Prompt classification failed: {e}")
+                prompt_type = "default"
 
+        # ─── Call CLI pipeline ─────────────────────────────
         command = f'python3 main.py "{user_prompt}"'
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
