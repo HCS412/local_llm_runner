@@ -1,10 +1,10 @@
-
 import streamlit as st
 import subprocess
 import os
 import time
 import re
 from datetime import datetime
+from local_llm_runner.utils_prompt_classifier import classify_prompt  # 🧠 New import
 
 # ─── Config ───────────────────────────────────────────────
 st.set_page_config(page_title="PromptForge", layout="centered")
@@ -28,6 +28,11 @@ if run and user_prompt.strip():
         start_time = time.time()
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         log_path = f"logs/run_{timestamp}.md"
+
+        # 🧠 Classify prompt and show it
+        with st.expander("🧠 Prompt Type (Auto-Classified)", expanded=False):
+            prompt_type = classify_prompt(user_prompt)
+            st.markdown(f"Detected: **{prompt_type}**")
 
         command = f'python3 main.py "{user_prompt}"'
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
