@@ -10,7 +10,10 @@ def format_step_header(title: str) -> str:
 
 # ─── Truncate long output for display ───────────────────────────────
 def truncate_output(text: str, limit: int = 1000) -> str:
-    return text[:limit] + "\n... [Truncated]" if len(text) > limit else text
+    if not text:
+        return "[No Output]"
+    clean = text.strip().replace("\r", "").replace("undefined", "")
+    return clean[:limit] + "\n... [Truncated]" if len(clean) > limit else clean
 
 # ─── Prompt type classification ─────────────────────────────────────
 def detect_prompt_type(prompt: str) -> str:
@@ -34,3 +37,20 @@ def is_simple_question(prompt: str) -> bool:
     lowered = prompt.lower()
     short_enough = len(lowered.split()) < 25
     return any(kw in lowered for kw in simple_keywords) and short_enough
+
+# ─── Dynamic follow-up suggestions for simple prompts ────────────────
+def suggest_followup(prompt: str) -> str:
+    prompt = prompt.lower()
+
+    if "taco" in prompt:
+        return "🌮 Want it spicy or mild? Would you like a vegetarian version too?"
+    if "recipe" in prompt:
+        return "👩‍🍳 Any dietary restrictions or cuisine types you prefer?"
+    if "travel" in prompt:
+        return "✈️ Would you like off-the-beaten-path suggestions or popular spots?"
+    if "book" in prompt:
+        return "📚 Would you prefer fiction or nonfiction? Light or intense?"
+    if "startup" in prompt:
+        return "🚀 Do you want funding strategy advice or product-market fit tips?"
+
+    return "💬 Want to go deeper or see alternatives?"
