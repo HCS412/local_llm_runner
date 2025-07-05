@@ -21,7 +21,8 @@ from utils import (
     format_step_header,
     truncate_output,
     sanitize_input,
-    is_simple_question
+    is_simple_question,
+    suggest_followup  # NEW for follow-up prompts
 )
 
 # ─── Load .env ─────────────────────────────────────────────────────
@@ -48,21 +49,27 @@ def run_pipeline(user_prompt):
 
     steps = []
 
-    def run_step(title, builder_fn, *args):
+    def run_step(title, builder_fn, *args, max_tokens=200):
         print(format_step_header(title))
         prompt = builder_fn(*args)
-        output = call_local_llm(prompt, max_tokens=200)
+        output = call_local_llm(prompt, max_tokens=max_tokens)
         print(truncate_output(output))
         steps.append({"title": title, "prompt": prompt, "output": output})
         return output
 
-    # ─── Shortcut for simple prompts ─────────────────────────────
+    # ─── Fast path for simple prompts ───────────────────────────────
     if is_simple_question(user_prompt):
-        simple_response = run_step("⚡ Simple Response", build_initial_prompt, user_prompt, prompt_type)
+        response = run_step("⚡ Simple Response", build_initial_prompt, user_prompt, prompt_type, max_tokens=300)
+
+        followup = suggest_followup(user_prompt)
+        if followup:
+            print(f"\n🤔 Follow-Up: {followup}")
+            steps.append({"title": "💬 Follow-Up Suggestion", "prompt": "", "output": followup})
+
         save_markdown_log(user_prompt, steps)
         return
 
-    # ─── Full pipeline ───────────────────────────────────────────
+    # ─── Full pipeline ───────────────────────────────────────────────
     principles = load_principles()
 
     initial = run_step("🧠 Step 1: Initial Response", build_initial_prompt, user_prompt, prompt_type)
@@ -83,7 +90,7 @@ def run_pipeline(user_prompt):
         run_step("🪞 Step 7: Reflect on Tensions", build_tension_prompt, revised)
         run_step("💀 Step 8: Meta-Soul Check", build_meta_soul_prompt, user_prompt, revised)
 
-    run_step("📈 Step 9: Growth + Summary", build_summary_prompt, initial, revised)
+    run_step("📈 Step 9: Growth + Summary", build_summary_prompt, initial, revised, max_tokens=500)
 
     save_markdown_log(user_prompt, steps)
 
