@@ -17,38 +17,56 @@ run = st.button("🚀 Run")
 
 # ─── Run Pipeline ─────────────────────────────────────────
 if run and user_prompt.strip():
-    with st.spinner("⏳ Working on your prompt..."):
+    with st.spinner("⏳ Running reasoning pipeline..."):
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         log_path = f"logs/run_{timestamp}.md"
-
-        output_container = st.empty()
         command = f'python3 main.py "{user_prompt}"'
 
         process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
-        current_step = ""
+        current_step = None
+        current_block = ""
+        steps = []
+
+        # Parse output step-by-step
         for line in process.stdout:
             line = line.strip()
 
             if line.startswith("✦ "):
+                # Save previous step before starting a new one
+                if current_step and current_block:
+                    steps.append((current_step, current_block.strip()))
+                    current_block = ""
+
                 current_step = line.replace("✦ ", "").strip()
-                output_container.markdown(f"⏳ <b>{current_step}</b>", unsafe_allow_html=True)
 
             elif line:
-                # Show each step response in collapsible sections
-                if current_step:
-                    st.markdown(
-                        f"<details><summary><b>{current_step}</b></summary><pre>{line}</pre></details>",
-                        unsafe_allow_html=True
-                    )
-                    current_step = ""  # Reset after showing
+                current_block += line + "\n"
+
+        # Capture final block
+        if current_step and current_block:
+            steps.append((current_step, current_block.strip()))
 
         process.wait()
-        output_container.markdown("✅ <b>Response Complete!</b>", unsafe_allow_html=True)
 
-        if os.path.exists(log_path):
-            with open(log_path, "rb") as f:
-                st.download_button("📄 Download Full Output", f, file_name=os.path.basename(log_path), mime="text/markdown")
+    # ─── Display Output ───────────────────────────────────────
+    st.success("✅ Response Complete!")
+    for step_title, step_content in steps:
+        st.markdown(
+            f"<details><summary><b>{step_title}</b></summary><pre>{step_content}</pre></details>",
+            unsafe_allow_html=True
+        )
+
+    # ─── Suggest Follow-Up ────────────────────────────────────
+    if steps:
+        last_output = steps[-1][1].strip()
+        if not last_output.endswith("?"):
+            st.markdown("💡 *Need more clarity or depth? Try a follow-up prompt!*")
+
+    # ─── Markdown Download ───────────────────────────────────
+    if os.path.exists(log_path):
+        with open(log_path, "rb") as f:
+            st.download_button("📄 Download Full Markdown Output", f, file_name=os.path.basename(log_path), mime="text/markdown")
 
 else:
     st.info("Enter a prompt above and press **Run** to begin.")
