@@ -1,3 +1,4 @@
+
 import sys
 import os
 from datetime import datetime
@@ -21,10 +22,12 @@ from prompt_builder import (
     build_summary_prompt
 )
 
+# ─── Print section header with color ───────────────────────────────
 def print_section(title):
     print(f"\n\033[95m✦ {title}\033[0m")
-    print("-" * (len(title) + 4))
+    print("-" * (len(title) + 4) + "\n")
 
+# ─── Save markdown log ───────────────────────────────
 def save_markdown_log(prompt, steps):
     os.makedirs("logs", exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -36,6 +39,14 @@ def save_markdown_log(prompt, steps):
             f.write(f"## {step['title']}\n{step['output']}\n\n")
     print(f"\n✅ Output saved to {path}")
 
+# ─── Truncate long output display in terminal ───────────────────────────────
+def display_truncated_output(output, limit=1000):
+    if len(output) > limit:
+        print(output[:limit] + "...\n[Truncated]")
+    else:
+        print(output)
+
+# ─── Main run pipeline ───────────────────────────────
 def run_pipeline(user_prompt):
     steps = []
     principles = load_principles()
@@ -43,8 +54,8 @@ def run_pipeline(user_prompt):
     def run_step(title, builder_fn, *args):
         print_section(title)
         prompt = builder_fn(*args)
-        output = call_local_llm(prompt)
-        print(output)
+        output = call_local_llm(prompt, max_tokens=500)
+        display_truncated_output(output)
         steps.append({"title": title, "prompt": prompt, "output": output})
         return output
 
