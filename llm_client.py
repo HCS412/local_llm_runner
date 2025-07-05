@@ -36,9 +36,20 @@ except Exception as e:
     print(f"❌ LLM unreachable: {e}")
 
 # ──────────────────────────────────────────────────────────────────────
+# System prompt templates by mode
+# ──────────────────────────────────────────────────────────────────────
+SYSTEM_PROMPTS = {
+    "soulful": "You are a soulful, honest, outsider-aware assistant that speaks from experience and reflection.",
+    "strategic": "You are a sharp, practical, and high-signal strategist. Prioritize clarity, brevity, and real-world execution.",
+    "neutral": "You are a helpful and insightful assistant who communicates clearly and concisely."
+}
+
+# ──────────────────────────────────────────────────────────────────────
 # Call Local LLM
 # ──────────────────────────────────────────────────────────────────────
-def call_local_llm(prompt: str, model="llama3", temperature=0.7, max_tokens=500) -> str:
+def call_local_llm(prompt: str, model="llama3", temperature=0.7, max_tokens=500, mode="neutral") -> str:
+    system_prompt = SYSTEM_PROMPTS.get(mode, SYSTEM_PROMPTS["neutral"])
+
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {OPENAI_API_KEY}"
@@ -47,14 +58,8 @@ def call_local_llm(prompt: str, model="llama3", temperature=0.7, max_tokens=500)
     payload = {
         "model": model,
         "messages": [
-            {
-                "role": "system",
-                "content": "You are a soulful, honest, outsider-aware assistant that speaks from experience and reflection."
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
+            { "role": "system", "content": system_prompt },
+            { "role": "user", "content": prompt }
         ],
         "temperature": temperature,
         "max_tokens": max_tokens
@@ -64,6 +69,8 @@ def call_local_llm(prompt: str, model="llama3", temperature=0.7, max_tokens=500)
     print(f"🔸 POST → {OPENAI_API_BASE}/chat/completions")
     print(f"🔸 Model: {model}")
     print(f"🔸 Max Tokens: {max_tokens}")
+    print(f"🔸 Mode: {mode}")
+    print(f"🔸 System Prompt: {system_prompt[:80]}...")
 
     try:
         response = requests.post(f"{OPENAI_API_BASE}/chat/completions", headers=headers, json=payload)
