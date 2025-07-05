@@ -3,10 +3,6 @@ import os
 from datetime import datetime
 from dotenv import load_dotenv
 
-# ─── Load environment ────────────────────────────────────────────────
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-load_dotenv(dotenv_path)
-
 from llm_client import call_local_llm
 from prompt_builder import (
     load_principles,
@@ -18,22 +14,20 @@ from prompt_builder import (
     build_second_critique_prompt,
     build_tension_prompt,
     build_meta_soul_prompt,
-    build_summary_prompt
+    build_summary_prompt,
+)
+from utils import (
+    detect_prompt_type,
+    format_step_header,
+    truncate_output,
+    sanitize_input
 )
 
-# ─── Print formatted section header ───────────────────────────────────
-def print_section(title):
-    print(f"\n\033[95m✦ {title}\033[0m")
-    print("-" * (len(title) + 4) + "\n")
+# ─── Load .env ─────────────────────────────────────────────────────
+dotenv_path = os.path.join(os.path.dirname(__file__), ".env")
+load_dotenv(dotenv_path)
 
-# ─── Truncate long LLM output for display ─────────────────────────────
-def display_truncated_output(output, limit=1000):
-    if len(output) > limit:
-        print(output[:limit] + "\n... [Truncated]")
-    else:
-        print(output)
-
-# ─── Save run to Markdown log ─────────────────────────────────────────
+# ─── Save run to Markdown ──────────────────────────────────────────
 def save_markdown_log(prompt, steps):
     os.makedirs("logs", exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -45,36 +39,27 @@ def save_markdown_log(prompt, steps):
             f.write(f"## {step['title']}\n{step['output']}\n\n")
     print(f"\n✅ Output saved to {path}")
 
-# ─── Main orchestration pipeline ──────────────────────────────────────
+# ─── Orchestration Pipeline ────────────────────────────────────────
 def run_pipeline(user_prompt):
+    user_prompt = sanitize_input(user_prompt)
+    prompt_type = detect_prompt_type(user_prompt)
+    print(f"\033[94m📌 Detected prompt type:\033[0m {prompt_type}\n")
+
     steps = []
     principles = load_principles()
 
     def run_step(title, builder_fn, *args):
-        print_section(title)
+        print(format_step_header(title))
         prompt = builder_fn(*args)
         output = call_local_llm(prompt, max_tokens=200)
-        display_truncated_output(output)
+        print(truncate_output(output))
         steps.append({"title": title, "prompt": prompt, "output": output})
         return output
 
-    # ─── Prompt-type classification ─────────────────────────────
-    lowered = user_prompt.lower()
-    if any(word in lowered for word in ["build", "design", "code", "implement", "api", "database", "tech", "python", "algorithm"]):
-        prompt_type = "technical"
-    elif any(word in lowered for word in ["justice", "race", "gender", "equity", "identity", "culture", "marginalized"]):
-        prompt_type = "social"
-    elif any(word in lowered for word in ["startup", "founder", "investor", "fund", "venture", "capital", "business"]):
-        prompt_type = "venture"
-    else:
-        prompt_type = "default"
-
-    print(f"\033[94m📌 Detected prompt type:\033[0m {prompt_type}\n")
-
-    # ─── Step 1: Always run initial prompt ─────────────────────
+    # Always run initial step
     initial = run_step("🧠 Step 1: Initial Response", build_initial_prompt, user_prompt, prompt_type)
 
-    # ─── Steps 2–3: Skip for technical prompts ────────────────
+    # Skip critique & deep dive for technical prompts
     if prompt_type != "technical":
         critique = run_step("🔍 Step 2: Critique v1 (Outsider Principles)", build_critique_prompt, initial, principles)
         deeper_critique = run_step("🕳️ Step 3: Expand Critique (What's Missing?)", build_deep_dive_prompt, critique)
@@ -82,25 +67,25 @@ def run_pipeline(user_prompt):
         critique = ""
         deeper_critique = ""
 
-    # ─── Step 4: Perspective Echo ──────────────────────────────
+    # Run perspective shift
     persona_echo = run_step("🎭 Step 4: Persona Echo (Perspective Shift)", build_persona_echo_prompt, initial, prompt_type)
 
-    # ─── Step 5: Merge and Revise ──────────────────────────────
+    # Run revision with merged insights
     revised = run_step("🔧 Step 5: Revision (Incorporate All)", build_revise_prompt, initial, critique, deeper_critique, persona_echo)
 
-    # ─── Steps 6–8: Only for social or deep prompts ───────────
+    # Run soul-checking layers for deeper prompts
     if prompt_type not in ["technical"]:
         run_step("🔎 Step 6: Second Critique (Refined Response)", build_second_critique_prompt, revised, principles)
         run_step("🪞 Step 7: Reflect on Tensions", build_tension_prompt, revised)
         run_step("💀 Step 8: Meta-Soul Check", build_meta_soul_prompt, user_prompt, revised)
 
-    # ─── Step 9: Always summarize ─────────────────────────────
+    # Always generate summary
     run_step("📈 Step 9: Growth + Summary", build_summary_prompt, initial, revised)
 
-    # ─── Save logs ─────────────────────────────────────────────
+    # Save output
     save_markdown_log(user_prompt, steps)
 
-# ─── Entry point ─────────────────────────────────────────────────────
+# ─── CLI Entrypoint ────────────────────────────────────────────────
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("❌ Please provide a prompt.")
