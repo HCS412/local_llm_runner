@@ -1,13 +1,7 @@
-
 import sys
 import os
 from datetime import datetime
 from dotenv import load_dotenv
-
-# ─── Explicitly load .env from script's directory ───────────────────────────────
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-load_dotenv(dotenv_path)
-
 from llm_client import call_local_llm
 from prompt_builder import (
     load_principles,
@@ -22,12 +16,16 @@ from prompt_builder import (
     build_summary_prompt
 )
 
-# ─── Print section header with color ───────────────────────────────
+# ─── Load environment variables ───────────────────────
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
+# ─── Colored section header ───────────────────────────
 def print_section(title):
     print(f"\n\033[95m✦ {title}\033[0m")
     print("-" * (len(title) + 4) + "\n")
 
-# ─── Save markdown log ───────────────────────────────
+# ─── Save full markdown log to /logs ─────────────────
 def save_markdown_log(prompt, steps):
     os.makedirs("logs", exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -39,22 +37,33 @@ def save_markdown_log(prompt, steps):
             f.write(f"## {step['title']}\n{step['output']}\n\n")
     print(f"\n✅ Output saved to {path}")
 
-# ─── Truncate long output display in terminal ───────────────────────────────
+# ─── Truncate wall of text in terminal ───────────────
 def display_truncated_output(output, limit=1000):
     if len(output) > limit:
-        print(output[:limit] + "...\n[Truncated]")
+        print(output[:limit].strip() + "\n...\n[Truncated]")
     else:
-        print(output)
+        print(output.strip())
 
-# ─── Main run pipeline ───────────────────────────────
+# ─── Choose response mode dynamically ────────────────
+def detect_mode(prompt):
+    if any(x in prompt.lower() for x in ["equity", "justice", "marginalized", "systemic", "race", "gender"]):
+        return "soulful"
+    elif any(x in prompt.lower() for x in ["venture", "startup", "investing", "product", "distribution", "growth", "capital"]):
+        return "strategic"
+    else:
+        return "neutral"
+
+# ─── Main pipeline ───────────────────────────────────
 def run_pipeline(user_prompt):
     steps = []
+    mode = detect_mode(user_prompt)
     principles = load_principles()
 
     def run_step(title, builder_fn, *args):
         print_section(title)
+        print("\033[90m[Thinking...]\033[0m")
         prompt = builder_fn(*args)
-        output = call_local_llm(prompt, max_tokens=500)
+        output = call_local_llm(prompt, max_tokens=200, mode=mode)
         display_truncated_output(output)
         steps.append({"title": title, "prompt": prompt, "output": output})
         return output
@@ -71,6 +80,7 @@ def run_pipeline(user_prompt):
 
     save_markdown_log(user_prompt, steps)
 
+# ─── Entry point ─────────────────────────────────────
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("❌ Please provide a prompt.")
