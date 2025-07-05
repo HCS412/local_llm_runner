@@ -1,5 +1,5 @@
 import json
-from utils import is_simple_question, suggest_followup
+from utils.utils import is_simple_question, suggest_followup
 
 # ─── Load Principles ────────────────────────────────────────
 def load_principles(path="principles.json") -> list[str]:
