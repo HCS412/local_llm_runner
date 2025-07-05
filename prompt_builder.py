@@ -1,24 +1,45 @@
-# prompt_builder.py
-
 import json
 
 def load_principles(path="principles.json") -> list[str]:
     with open(path, "r") as f:
         return json.load(f)
 
-def build_initial_prompt(user_prompt: str) -> str:
-    return f"""
-Respond to the following prompt with emotional depth, cultural humility, historical memory, and philosophical clarity.
+# 🧠 Initial prompt builder
+def build_initial_prompt(user_prompt: str, prompt_type: str = "default") -> str:
+    if prompt_type == "technical":
+        return f"""
+You're a precise, focused assistant. Answer the prompt below with clarity, conciseness, and direct usefulness. No fluff.
+
+Prompt:
+"{user_prompt}"
+"""
+    elif prompt_type == "venture":
+        return f"""
+You're a sharp, experienced VC and systems thinker. Analyze and answer this prompt with practical insight and contrarian edge.
+
+Prompt:
+"{user_prompt}"
+"""
+    elif prompt_type == "social":
+        return f"""
+You're a reflective, soulful outsider. Speak from truth, experience, and cultural wisdom.
 
 Prompt:
 "{user_prompt}"
 
-Avoid generic answers. Speak from experience. Be precise. Be human.
+Avoid clichés. No corporate speak. Be real. Be human.
+"""
+    else:
+        return f"""
+Answer the following prompt with honesty and insight:
+
+"{user_prompt}"
 """
 
+# 🔍 First critique
 def build_critique_prompt(response: str, principles: list[str]) -> str:
     return f"""
-You are an outsider ethicist and cultural philosopher. Using the following principles:
+Using these outsider principles:
 
 {chr(10).join(f"- {p}" for p in principles)}
 
@@ -26,80 +47,89 @@ Critique this AI-generated response:
 
 "{response}"
 
-Where is it too clean, too corporate, too safe, too vague, or too ungrounded?
+Where is it too safe, vague, corporate, ungrounded, or cliché?
 """
 
+# 🕳️ Deep dive
 def build_deep_dive_prompt(critique: str) -> str:
     return f"""
-Take this initial critique and go deeper.
+Take this critique deeper.
 
 Critique:
 "{critique}"
 
-What *wasn't* said yet? What assumptions are still hidden? What cultural or emotional depth is missing? Who is left out?
+What assumptions remain? What's left unsaid? Whose voice is missing?
 """
 
-def build_persona_echo_prompt(response: str) -> str:
+# 🎭 Perspective echo
+def build_persona_echo_prompt(response: str, prompt_type: str = "default") -> str:
+    perspective = {
+        "technical": "An engineer working on legacy infrastructure in rural India",
+        "venture": "A first-time founder in Detroit raising pre-seed capital",
+        "social": "A Black single mother raising two sons in a rapidly gentrifying city",
+        "default": "An underdog with sharp eyes and lived experience"
+    }.get(prompt_type, "An underdog with sharp eyes and lived experience")
+
     return f"""
-Imagine you are a different kind of thinker reading this response — someone from a specific context:
+Imagine you're {perspective}.
 
-"A Black father raising daughters in a rapidly gentrifying city."
-
-From that perspective, reflect on the response below:
+Read the response below and reflect:
 
 "{response}"
 
-What resonates? What feels wrong? What would you add, or challenge?
+What feels true? What feels off? What would you challenge or add?
 """
 
+# 🛠️ Revise based on all insights
 def build_revise_prompt(original: str, critique: str, deep_dive: str, persona_echo: str) -> str:
     return f"""
-Revise the original response using the following layers of insight:
+Revise the original response using:
 
 1. Core critique:
 "{critique}"
 
-2. Deeper issues identified:
+2. Deep dive:
 "{deep_dive}"
 
-3. A specific lived perspective:
+3. Lived perspective:
 "{persona_echo}"
-
-Now rewrite the original with truth, soul, cultural insight, and honesty.
 
 Original:
 "{original}"
 
-Revision:
+Revised:
 """
 
+# 🔁 Second critique
 def build_second_critique_prompt(revised: str, principles: list[str]) -> str:
     return f"""
-Re-evaluate this revised response using these same outsider principles:
+Re-evaluate this revised response using the same principles:
 
 {chr(10).join(f"- {p}" for p in principles)}
 
 Response:
 "{revised}"
 
-Has it improved? What remains unresolved or still superficial?
+Is it deeper? Clearer? More truthful? What remains shallow?
 """
 
+# 🪞 Tensions
 def build_tension_prompt(revised: str) -> str:
     return f"""
-Even in a strong response, tension remains.
+Even strong responses carry tension.
 
-Read the following revised response:
+Read this revised output:
 
 "{revised}"
 
-What tensions, contradictions, unresolved truths or griefs are still present?
-What would someone *not from this background* find difficult to understand here?
+What contradictions, biases, or emotional gaps remain?
+What might a skeptic or outsider still question?
 """
 
+# 💀 Meta soul check
 def build_meta_soul_prompt(original_prompt: str, revised_response: str) -> str:
     return f"""
-Imagine this model had a soul.
+If this model had a soul...
 
 Prompt:
 "{original_prompt}"
@@ -107,13 +137,13 @@ Prompt:
 Final Response:
 "{revised_response}"
 
-What would this model still wrestle with if it cared about truth?
-What would it question about itself? Where would it feel ashamed or proud?
+What would it wrestle with? What is unresolved? What would it feel — shame, pride, doubt?
 """
 
+# 📈 Summary
 def build_summary_prompt(initial: str, revised: str) -> str:
     return f"""
-Compare the following two versions:
+Compare both outputs:
 
 Initial:
 "{initial}"
@@ -121,6 +151,6 @@ Initial:
 Revised:
 "{revised}"
 
-Summarize the key differences in tone, depth, and truth.
-What did the process surface — and what might it still be afraid to say?
+Summarize the difference in tone, substance, and soul.
+What did the transformation surface?
 """
