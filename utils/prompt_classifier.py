@@ -1,57 +1,101 @@
 # utils/prompt_classifier.py
 
-from typing import Dict, List, Optional
-
+from typing import Dict, List, Tuple
+import re
+import math
 
 class PromptClassifier:
     """
-    A rule-based (and future LLM-backed) prompt classifier.
-    Supports easy extension and config-based updates.
+    An enhanced rule-based prompt classifier with confidence scoring.
+    Designed to be extensible, robust, and semi-semantic in behavior.
     """
 
     def __init__(self):
-        # You can later load this from a JSON/YAML config
+        # Keyword library for each category
         self.rules: Dict[str, List[str]] = {
-            "venture": ["startup", "funding", "vc", "venture", "investor", "cap table", "term sheet", "deal"],
-            "technical": ["ai", "code", "python", "train", "build", "prompt", "api", "token", "model"],
-            "social": ["community", "identity", "race", "justice", "equity", "gentrification", "bias", "disparity"],
-            "emotional": ["anxious", "feel", "cope", "sad", "angry", "therapy", "lonely", "overwhelmed"],
-            "creative": ["story", "poem", "imagine", "fiction", "write", "character", "lyrics", "creative"],
-            "default": []
+            "venture": [
+                "startup", "funding", "vc", "venture", "investor", "cap table", "term sheet",
+                "exit", "raise", "pre-seed", "angel", "dilution", "round", "portfolio"
+            ],
+            "technical": [
+                "ai", "code", "python", "train", "build", "prompt", "api", "token", "model",
+                "embedding", "inference", "weights", "script", "debug", "compute", "hardware"
+            ],
+            "social": [
+                "community", "identity", "race", "justice", "equity", "gentrification", "bias",
+                "disparity", "culture", "inclusion", "oppression", "voice", "liberation"
+            ],
+            "emotional": [
+                "anxious", "feel", "cope", "sad", "angry", "therapy", "lonely", "overwhelmed",
+                "hurt", "grief", "healing", "trauma", "depression", "panic"
+            ],
+            "creative": [
+                "story", "poem", "imagine", "fiction", "write", "character", "lyrics", "creative",
+                "plot", "narrative", "protagonist", "world-building"
+            ],
+            "infrastructure": [
+                "bridge", "transport", "power", "grid", "access", "rural", "legacy", "infrastructure",
+                "system", "connectivity", "development", "low bandwidth"
+            ],
+            "education": [
+                "school", "teacher", "literacy", "learn", "curriculum", "education", "student",
+                "homework", "college", "textbook"
+            ],
+            "health": [
+                "health", "illness", "doctor", "care", "hospital", "treatment", "mental",
+                "diagnosis", "insurance", "access"
+            ],
+            "climate": [
+                "climate", "water", "drought", "heat", "environment", "wildfire", "carbon",
+                "resilience", "green", "pollution"
+            ],
+            "default": []  # fallback
         }
 
-    def detect_prompt_type(self, prompt: str) -> str:
+    def detect_prompt_type_with_confidence(self, prompt: str) -> Tuple[str, float]:
         """
-        Uses keyword matching to classify the prompt into a category.
-
-        Args:
-            prompt (str): The user-provided prompt.
+        Detects category with confidence score.
 
         Returns:
-            str: One of the category labels.
+            Tuple[str, float]: category and confidence (0.0 to 1.0)
         """
         prompt = prompt.lower()
+        scores: Dict[str, float] = {}
 
         for category, keywords in self.rules.items():
-            if any(term in prompt for term in keywords):
-                return category
+            match_count = sum(1 for kw in keywords if re.search(rf"\\b{re.escape(kw)}\\b", prompt))
+            total_keywords = len(keywords) or 1  # avoid div by zero
+            scores[category] = match_count / total_keywords
 
-        return "default"
+        # Sort by score
+        sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        top_category, top_score = sorted_scores[0]
+
+        # Soft fallback if score is too low
+        if top_score < 0.15:
+            return ("contextual_product", top_score)
+
+        return (top_category, top_score)
 
 
-# Shared instance (used in app.py and main.py)
+# Shared instance
 classifier = PromptClassifier()
-
 
 def classify_prompt(prompt: str, llm_runner=None) -> str:
     """
-    Public wrapper used in app.py or elsewhere.
-
-    Args:
-        prompt (str): The input prompt.
-        llm_runner (callable, optional): For future use. If passed, allows fallback to LLM classification.
-
+    Public interface for classification
+    
     Returns:
-        str: Prompt category.
+        str: the prompt type
     """
-    return classifier.detect_prompt_type(prompt)
+    category, _ = classifier.detect_prompt_type_with_confidence(prompt)
+    return category
+
+def classify_prompt_with_confidence(prompt: str) -> Tuple[str, float]:
+    """
+    Full access method for frontend or logging
+    
+    Returns:
+        Tuple[str, float]: category and score
+    """
+    return classifier.detect_prompt_type_with_confidence(prompt)
