@@ -59,7 +59,9 @@ if run and user_prompt.strip():
             followups = []
             current_card_lines = []
             current_title = ""
-            card = st.container()
+
+            # Show real-time progress using status
+            step_progress = st.status("🧠 Thinking through steps...", expanded=True)
 
             for line in iter(process.stdout.readline, ''):
                 raw_output_lines.append(line)
@@ -75,13 +77,17 @@ if run and user_prompt.strip():
 
                 if clean_line.startswith("##") or any(word in clean_line.lower() for word in ["step", "response", "revision", "critique", "summary"]):
                     if current_card_lines:
-                        with card.expander(current_title or "Step"):
-                            st.markdown("\n".join(current_card_lines))
-                        current_card_lines = []
+                        step_progress.write(f"✅ Finished: {current_title}")
                     current_title = clean_line.replace("##", "").strip()
+                    step_progress.write(f"⚙️ {current_title}")
+                    current_card_lines = []
                 else:
                     current_card_lines.append(clean_line)
 
+            step_progress.update(label="✅ All steps completed", state="complete")
+
+            # Final display of all cards
+            card = st.container()
             if current_card_lines:
                 with card.expander(current_title or "Step"):
                     st.markdown("\n".join(current_card_lines))
@@ -90,6 +96,7 @@ if run and user_prompt.strip():
             elapsed = round(time.time() - start_time, 1)
             st.success(f"✅ Response Complete in {elapsed} seconds")
 
+            # Follow-up suggestions
             if followups:
                 st.markdown("### 🔁 Suggested Follow-Ups:")
                 cols = st.columns(len(followups))
@@ -99,6 +106,7 @@ if run and user_prompt.strip():
                             st.session_state.autofill_prompt = suggestion
                             st.experimental_rerun()
 
+            # Debug Output and Download
             if os.path.exists(log_path):
                 with open(log_path, "r") as f:
                     raw_output = f.read()
