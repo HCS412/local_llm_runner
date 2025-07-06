@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # ─── Local Imports ────────────────────────────────────────
 from run_llm import run_llm
-from utils_prompt_classifier import classify_prompt
+from utils.prompt_classifier import classify_prompt
 from utils.prompt_router import route_prompt
 
 # ─── Streamlit Page Config ────────────────────────────────
