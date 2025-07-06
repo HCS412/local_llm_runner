@@ -56,15 +56,12 @@ if run and user_prompt.strip():
             process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
             raw_output_lines = []
-            cleaned_output_lines = []
             followups = []
-            card = st.container()
-
-            current_card = None
             current_card_lines = []
             current_title = ""
+            card = st.container()
 
-            for line in process.stdout:
+            for line in iter(process.stdout.readline, ''):
                 raw_output_lines.append(line)
                 clean_line = line.strip()
 
@@ -76,7 +73,7 @@ if run and user_prompt.strip():
                     followups.extend([f.strip().strip("?") for f in followup_matches if f.strip()])
                     continue
 
-                if clean_line.startswith("##") or any(step in clean_line.lower() for step in ["step", "response", "revision", "critique", "summary"]):
+                if clean_line.startswith("##") or any(word in clean_line.lower() for word in ["step", "response", "revision", "critique", "summary"]):
                     if current_card_lines:
                         with card.expander(current_title or "Step"):
                             st.markdown("\n".join(current_card_lines))
