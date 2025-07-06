@@ -4,9 +4,7 @@ import os
 import sys
 import time
 import re
-import json
 from datetime import datetime
-from uuid import uuid4
 
 # ─── Add local directory to Python path ───────────────────
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -38,16 +36,14 @@ if run and user_prompt.strip():
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         log_path = f"logs/run_{timestamp}.md"
 
-        # 🧠 Step 1: Classify prompt type using LLM
-        with st.expander("🧠 Prompt Type (Auto-Classified)", expanded=False):
-            try:
-                prompt_type = classify_prompt(user_prompt, run_llm)
+        try:
+            prompt_type = classify_prompt(user_prompt, run_llm)
+            with st.expander("🧠 Prompt Type (Auto-Classified)", expanded=False):
                 st.markdown(f"Detected: **{prompt_type}**")
-            except Exception as e:
-                st.error(f"Prompt classification failed: {e}")
-                prompt_type = "default"
+        except Exception as e:
+            st.error(f"Prompt classification failed: {e}")
+            prompt_type = "default"
 
-        # 🔀 Step 2: Decide routing
         mode = route_prompt(user_prompt, prompt_type)
 
         if mode == "simple":
@@ -62,9 +58,11 @@ if run and user_prompt.strip():
             raw_output_lines = []
             cleaned_output_lines = []
             followups = []
-            step_blocks = []
-            current_step = []
-            current_title = None
+            card = st.container()
+
+            current_card = None
+            current_card_lines = []
+            current_title = ""
 
             for line in process.stdout:
                 raw_output_lines.append(line)
@@ -78,27 +76,22 @@ if run and user_prompt.strip():
                     followups.extend([f.strip().strip("?") for f in followup_matches if f.strip()])
                     continue
 
-                if clean_line.startswith("##"):
-                    if current_title and current_step:
-                        step_blocks.append({"title": current_title, "output": "\n".join(current_step)})
+                if clean_line.startswith("##") or any(step in clean_line.lower() for step in ["step", "response", "revision", "critique", "summary"]):
+                    if current_card_lines:
+                        with card.expander(current_title or "Step"):
+                            st.markdown("\n".join(current_card_lines))
+                        current_card_lines = []
                     current_title = clean_line.replace("##", "").strip()
-                    current_step = []
-                elif clean_line:
-                    current_step.append(clean_line)
+                else:
+                    current_card_lines.append(clean_line)
 
-            if current_title and current_step:
-                step_blocks.append({"title": current_title, "output": "\n".join(current_step)})
+            if current_card_lines:
+                with card.expander(current_title or "Step"):
+                    st.markdown("\n".join(current_card_lines))
 
             process.wait()
             elapsed = round(time.time() - start_time, 1)
             st.success(f"✅ Response Complete in {elapsed} seconds")
-
-            st.markdown("### 🧠 Step-by-Step Output")
-            for step in step_blocks:
-                with st.expander(f"🔎 {step['title']}", expanded=True):
-                    st.markdown(f"<div style='background-color:#111827;padding:10px;border-radius:10px;'>", unsafe_allow_html=True)
-                    st.markdown(step["output"])
-                    st.markdown("</div>", unsafe_allow_html=True)
 
             if followups:
                 st.markdown("### 🔁 Suggested Follow-Ups:")
