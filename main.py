@@ -16,13 +16,14 @@ from prompt_builder import (
     build_meta_soul_prompt,
     build_summary_prompt,
 )
+
+from utils.prompt_classifier import classify_prompt
 from utils import (
-    detect_prompt_type,
     format_step_header,
     truncate_output,
     sanitize_input,
     is_simple_question,
-    suggest_followup  # NEW for follow-up prompts
+    suggest_followup
 )
 
 # ─── Load .env ─────────────────────────────────────────────────────
@@ -44,7 +45,7 @@ def save_markdown_log(prompt, steps):
 # ─── Orchestration Pipeline ────────────────────────────────────────
 def run_pipeline(user_prompt):
     user_prompt = sanitize_input(user_prompt)
-    prompt_type = detect_prompt_type(user_prompt)
+    prompt_type = classify_prompt(user_prompt)
     print(f"\033[94m📌 Detected prompt type:\033[0m {prompt_type}\n")
 
     steps = []
