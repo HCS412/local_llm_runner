@@ -4,7 +4,9 @@ import os
 import sys
 import time
 import re
+import json
 from datetime import datetime
+from uuid import uuid4
 
 # ─── Add local directory to Python path ───────────────────
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -49,19 +51,20 @@ if run and user_prompt.strip():
         mode = route_prompt(user_prompt, prompt_type)
 
         if mode == "simple":
-            # Run local LLM directly for fast/simple prompt
             response = run_llm(user_prompt)
             elapsed = round(time.time() - start_time, 1)
             st.success(f"✅ Simple LLM Response in {elapsed} seconds")
             st.markdown(f"### 🧠 Answer:\n\n{response}")
         else:
-            # Full critique pipeline via subprocess
             command = f'python3 main.py "{user_prompt}"'
             process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
             raw_output_lines = []
             cleaned_output_lines = []
             followups = []
+            step_blocks = []
+            current_step = []
+            current_title = None
 
             for line in process.stdout:
                 raw_output_lines.append(line)
@@ -75,19 +78,27 @@ if run and user_prompt.strip():
                     followups.extend([f.strip().strip("?") for f in followup_matches if f.strip()])
                     continue
 
-                if "Detected prompt type" in clean_line or "✦" in clean_line:
-                    cleaned_output_lines.append(f"📌 <b>{clean_line.replace('✦', '').strip()}</b>")
+                if clean_line.startswith("##"):
+                    if current_title and current_step:
+                        step_blocks.append({"title": current_title, "output": "\n".join(current_step)})
+                    current_title = clean_line.replace("##", "").strip()
+                    current_step = []
                 elif clean_line:
-                    cleaned_output_lines.append(clean_line)
+                    current_step.append(clean_line)
+
+            if current_title and current_step:
+                step_blocks.append({"title": current_title, "output": "\n".join(current_step)})
 
             process.wait()
             elapsed = round(time.time() - start_time, 1)
             st.success(f"✅ Response Complete in {elapsed} seconds")
 
-            st.markdown("<details><summary>📄 <b>View Clean Output</b></summary>", unsafe_allow_html=True)
-            for line in cleaned_output_lines:
-                st.markdown(line, unsafe_allow_html=True)
-            st.markdown("</details>", unsafe_allow_html=True)
+            st.markdown("### 🧠 Step-by-Step Output")
+            for step in step_blocks:
+                with st.expander(f"🔎 {step['title']}", expanded=True):
+                    st.markdown(f"<div style='background-color:#111827;padding:10px;border-radius:10px;'>", unsafe_allow_html=True)
+                    st.markdown(step["output"])
+                    st.markdown("</div>", unsafe_allow_html=True)
 
             if followups:
                 st.markdown("### 🔁 Suggested Follow-Ups:")
