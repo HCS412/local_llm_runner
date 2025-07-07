@@ -1,153 +1,161 @@
-🔧 PromptForge
-A fully local, open-source LLM prompt analysis and critique pipeline — for deep reasoning, better answers, and zero API costs.
+🧠 PromptForge
+Orchestrated Local Reasoning with LLMs
+A fully local, open-source pipeline for structured prompt analysis, critique, and contextual revision. Built for thinkers, hackers, and alignment nerds.
 
 💡 What It Does
-PromptForge is a local AI-powered system that:
+PromptForge goes beyond basic prompting. It:
 
-Classifies user prompts (simple vs. complex)
+Classifies prompts based on topic, tone, and complexity
 
-Routes them to the right LLM processing pipeline
+Selects dynamic reasoning personas for diverse reflection
 
-Applies a step-by-step critique and revision process
+Orchestrates a modular pipeline of critique, reframing, and revision
 
-Returns sharper, more thoughtful responses — automatically
+Surfaces tension and multiple perspectives
 
-All of this runs 100% locally using open-source models and tools like Ollama, LM Studio, and Streamlit. No API keys. No cloud dependencies.
+Returns answers that think deeper — all 100% locally
 
-🧱 Features
-🔍 Auto classification of prompt type (simple vs full-pipeline)
+No API keys. No tracking. No cloud calls.
+Just reasoning on your machine.
 
-🛠️ Modular pipeline with critique, persona shift, revision, and meta-reflection
+🔧 Why It Matters
+LLMs are too often trained to be helpful, polite, and forgettable.
+PromptForge helps them be critical, context-aware, and even soulful.
 
-⚙️ Streamlit UI for simple UX with labeled outputs and clean flow
+It’s a new kind of reasoning tool:
 
-🧠 Model-agnostic design — works with any local model (Mistral, Phi, TinyLlama, etc.)
+One that shows its work
 
-🗂️ All outputs saved as structured markdown logs
+That critiques itself
 
-🖼 Example Use Case
-Prompt: “What should I consider before launching a SaaS business?”
+That doesn't just echo Silicon Valley defaults
 
-PromptForge automatically:
+And runs locally for total transparency + ownership
 
-Detects it's a strategic (complex) question
-
-Generates a first answer
-
-Critiques it from multiple perspectives
-
-Revises and refines the response
-
-Surfaces unresolved tensions
-
-Summarizes how the final output evolved
-
-All visible step-by-step.
+🧱 Key Features
+Feature	Description
+🧠 Prompt classifier	Auto-detects complexity, topic, tone
+🔁 Pipeline orchestration	Step-by-step critique + reframe flow
+🎭 Dynamic personas	Models respond as barbers, poets, technologists, etc.
+📊 Confidence scoring	Know how confidently a category is chosen
+🖼 Expandable Streamlit UI	Clean, card-based outputs with step labels
+🧩 Model-agnostic	Works with any local LLM (TinyLLaMA, Mistral, Phi)
+🗂 Logs everything	All runs saved as structured markdown for later analysis
 
 🖥️ Tech Stack
 Tool	Purpose
-Python 3.9+	Core logic + LLM routing
-Streamlit	Interactive frontend
-Ollama / LM Studio	Model hosting (GGUF)
-TinyLlama / Mistral / Phi	Local language models
+Python 3.9+	Core logic, classification, orchestration
+Streamlit	UI frontend
+Ollama / LM Studio	Local model runners (GGUF)
+TinyLLaMA, Mistral, Phi	Example models
 Markdown	Output formatting & logs
 
+🖼 Example Flow
+Prompt:
+
+“What should I consider before launching a SaaS business?”
+
+PromptForge:
+
+Classifies as venture + complex
+
+Chooses relevant reasoning personas
+
+Runs a full multi-step critique pipeline
+
+Surfaces tensions, alternative framings
+
+Revises and finalizes
+
+→ Returns layered insight instead of generic tips.
+
 🚀 Quick Start
-1. Clone the repo
 bash
 Copy
 Edit
 git clone https://github.com/HCS412/local_llm_runner.git
 cd local_llm_runner
-2. Install dependencies
-bash
-Copy
-Edit
 pip install -r requirements.txt
-3. Start the Streamlit app
-bash
-Copy
-Edit
 streamlit run app.py
-4. Load a model locally
-Make sure LM Studio or Ollama is running a supported model (like tinyllama, mistral, or phi).
+🧠 Be sure to have a local LLM loaded via LM Studio or Ollama (e.g. TinyLLaMA, Mistral, Phi).
 
-🧪 Prompt Pipeline
-The system dynamically chooses between:
-
+⚙️ Prompt Routing
 Type	Description
-simple	Direct factual lookup (e.g., “Who was the first president?”)
-full_pipeline	Complex reasoning, reflection, or opinion-based prompts
+simple	Short, factual prompts → direct LLM response
+full_pipeline	Deeper prompts → critique, personas, revisions
 
-The full pipeline includes:
-
+Full Pipeline Stages:
 Initial generation
 
-Critique (reasoning flaws, biases)
+Reasoning critique
 
-Expansion of depth/context
+Persona reframing
 
-Persona shift / rephrasing
+Answer revision
 
-Revised answer
+Meta-summary
 
-Final critique + tension surfacing
+Follow-up suggestions
 
-Summary and log
+Markdown log output
 
-📁 Directory Structure
+📁 Directory Overview
 bash
 Copy
 Edit
 ├── app.py                     # Streamlit frontend
-├── main.py                    # Core CLI runner
+├── main.py                    # CLI runner
 ├── utils/
-│   ├── prompt_router.py       # Determines simple vs full
-│   ├── utils_prompt_classifier.py # Auto prompt classifier
-│   ├── formatting.py          # Markdown formatting
-│   ├── __init__.py            # Imports
-├── logs/                      # Run logs as .md
+│   ├── prompt_router.py       # Pipeline decision logic
+│   ├── prompt_classifier.py   # Smart classification engine
+│   ├── dynamic_persona_router.py # Persona selection system
+│   ├── formatting.py          # Markdown cleanup
+├── logs/                      # Markdown logs
 ├── requirements.txt
-├── README.md
-🔧 Configuration Tips
-🧠 Swap models via LM Studio or Ollama (just update in main.py)
+└── README.md
+🧠 Config Tips
+🎭 Add more personas in dynamic_persona_router.py
 
-📦 Add more critique personas by expanding principles.json
+⚡ Run smaller models for speed, or swap for custom ones
 
-⚡ Improve performance by choosing smaller models or streamlining pipeline stages
+🔄 Easily plug in sentence embeddings or OpenAI fallback
 
-🌐 Examples
+🪞 Use markdown logs to analyze model behavior over time
+
+🌐 Example Prompts
 bash
 Copy
 Edit
 python main.py "How can I launch a startup with no funding?"
-python main.py "What does it take to be a great investor?"
-python main.py "Why do people still follow controversial public figures?"
-📌 Roadmap
- Optional GPT-4 comparison panel
+python main.py "Why do people follow controversial public figures?"
+python main.py "What should I teach my kids about race and AI?"
+🧭 Roadmap
+ Side-by-side model comparisons (TinyLLaMA vs GPT-4)
 
- Ability to toggle critique personas (e.g. teacher, founder, historian)
+ FastAPI server mode
 
- FastAPI or local API for app integrations
+ Toggle personas per run
 
- Side-by-side LLM benchmarking
+ Memory + prompt history
 
- Persistent config settings and memory
+ External dataset reflection
 
-🤝 Contributing
-Open to ideas, PRs, and critiques — especially from:
+ User-defined critique stages
 
-ML builders
+🤝 Contribute
+We welcome:
 
-Prompt engineers
+🧠 Philosophers + prompt engineers
 
-Educators
+👩‍🔧 Builders + model tinkerers
 
-Philosophers
+🔬 Researchers on alignment, cognition, or bias
 
-Curious hackers
+🧩 Creative weirdos and systems thinkers
 
-📣 License
-MIT License.
-Build, remix, explore. Just don’t lock it behind a paywall.
+Open a PR, issue, or idea.
 
+🪪 License
+MIT.
+Build. Remix. Learn. Reflect.
+Just don’t put it behind a paywall.
