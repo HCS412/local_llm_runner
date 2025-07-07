@@ -17,6 +17,29 @@ from utils.prompt_router import route_prompt
 # ─── Streamlit Page Config ────────────────────────────────
 st.set_page_config(page_title="PromptForge", layout="centered")
 
+st.markdown("""
+    <style>
+        .step-card {
+            background-color: #1c1c1c;
+            padding: 1.2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 0 8px rgba(255,255,255,0.05);
+            margin-bottom: 1.2rem;
+        }
+        .step-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #f6f6f6;
+            margin-bottom: 0.5rem;
+        }
+        .step-content {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #dddddd;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 st.markdown("<h1 style='text-align: center;'>🛠️ PromptForge</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center;'>Sharp, clear, adaptive AI reasoning.</p>", unsafe_allow_html=True)
 st.markdown("---")
@@ -50,7 +73,7 @@ if run and user_prompt.strip():
             response = run_llm(user_prompt)
             elapsed = round(time.time() - start_time, 1)
             st.success(f"✅ Simple LLM Response in {elapsed} seconds")
-            st.markdown(f"### 🧠 Answer:\n\n{response}")
+            st.markdown("""<div class='step-card'><div class='step-title'>🧠 Answer:</div><div class='step-content'>""" + response + """</div></div>""", unsafe_allow_html=True)
         else:
             command = f'python3 main.py "{user_prompt}"'
             process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
@@ -59,9 +82,7 @@ if run and user_prompt.strip():
             followups = []
             current_card_lines = []
             current_title = ""
-
-            # Show real-time progress using status
-            step_progress = st.status("🧠 Thinking through steps...", expanded=True)
+            step_container = st.container()
 
             for line in iter(process.stdout.readline, ''):
                 raw_output_lines.append(line)
@@ -77,26 +98,31 @@ if run and user_prompt.strip():
 
                 if clean_line.startswith("##") or any(word in clean_line.lower() for word in ["step", "response", "revision", "critique", "summary"]):
                     if current_card_lines:
-                        step_progress.write(f"✅ Finished: {current_title}")
+                        with step_container.container():
+                            st.markdown(f"""
+                                <div class='step-card'>
+                                    <div class='step-title'>🧩 {current_title}</div>
+                                    <div class='step-content'>{'<br>'.join(current_card_lines)}</div>
+                                </div>
+                            """, unsafe_allow_html=True)
+                        current_card_lines = []
                     current_title = clean_line.replace("##", "").strip()
-                    step_progress.write(f"⚙️ {current_title}")
-                    current_card_lines = []
                 else:
                     current_card_lines.append(clean_line)
 
-            step_progress.update(label="✅ All steps completed", state="complete")
-
-            # Final display of all cards
-            card = st.container()
             if current_card_lines:
-                with card.expander(current_title or "Step"):
-                    st.markdown("\n".join(current_card_lines))
+                with step_container.container():
+                    st.markdown(f"""
+                        <div class='step-card'>
+                            <div class='step-title'>🧩 {current_title}</div>
+                            <div class='step-content'>{'<br>'.join(current_card_lines)}</div>
+                        </div>
+                    """, unsafe_allow_html=True)
 
             process.wait()
             elapsed = round(time.time() - start_time, 1)
             st.success(f"✅ Response Complete in {elapsed} seconds")
 
-            # Follow-up suggestions
             if followups:
                 st.markdown("### 🔁 Suggested Follow-Ups:")
                 cols = st.columns(len(followups))
@@ -106,7 +132,6 @@ if run and user_prompt.strip():
                             st.session_state.autofill_prompt = suggestion
                             st.experimental_rerun()
 
-            # Debug Output and Download
             if os.path.exists(log_path):
                 with open(log_path, "r") as f:
                     raw_output = f.read()
