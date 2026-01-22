@@ -1,161 +1,74 @@
-🧠 PromptForge
-Orchestrated Local Reasoning with LLMs
-A fully local, open-source pipeline for structured prompt analysis, critique, and contextual revision. Built for thinkers, hackers, and alignment nerds.
+# mull
 
-💡 What It Does
-PromptForge goes beyond basic prompting. It:
+A CLI thinking partner that critiques and refines its own responses.
 
-Classifies prompts based on topic, tone, and complexity
+*Your first answer is rarely your best. mull finds the better one.*
 
-Selects dynamic reasoning personas for diverse reflection
+## What it does
 
-Orchestrates a modular pipeline of critique, reframing, and revision
+You ask a question. Instead of giving you a quick answer, mull *thinks it through*:
 
-Surfaces tension and multiple perspectives
+1. **Initial response** - Answers your prompt
+2. **Self-critique** - Challenges its own answer using built-in "outsider principles"
+3. **Refined response** - Delivers an improved answer informed by the critique
 
-Returns answers that think deeper — all 100% locally
+The result: more thoughtful, more honest, less shallow responses.
 
-No API keys. No tracking. No cloud calls.
-Just reasoning on your machine.
+## Install
 
-🔧 Why It Matters
-LLMs are too often trained to be helpful, polite, and forgettable.
-PromptForge helps them be critical, context-aware, and even soulful.
-
-It’s a new kind of reasoning tool:
-
-One that shows its work
-
-That critiques itself
-
-That doesn't just echo Silicon Valley defaults
-
-And runs locally for total transparency + ownership
-
-🧱 Key Features
-Feature	Description
-🧠 Prompt classifier	Auto-detects complexity, topic, tone
-🔁 Pipeline orchestration	Step-by-step critique + reframe flow
-🎭 Dynamic personas	Models respond as barbers, poets, technologists, etc.
-📊 Confidence scoring	Know how confidently a category is chosen
-🖼 Expandable Streamlit UI	Clean, card-based outputs with step labels
-🧩 Model-agnostic	Works with any local LLM (TinyLLaMA, Mistral, Phi)
-🗂 Logs everything	All runs saved as structured markdown for later analysis
-
-🖥️ Tech Stack
-Tool	Purpose
-Python 3.9+	Core logic, classification, orchestration
-Streamlit	UI frontend
-Ollama / LM Studio	Local model runners (GGUF)
-TinyLLaMA, Mistral, Phi	Example models
-Markdown	Output formatting & logs
-
-🖼 Example Flow
-Prompt:
-
-“What should I consider before launching a SaaS business?”
-
-PromptForge:
-
-Classifies as venture + complex
-
-Chooses relevant reasoning personas
-
-Runs a full multi-step critique pipeline
-
-Surfaces tensions, alternative framings
-
-Revises and finalizes
-
-→ Returns layered insight instead of generic tips.
-
-🚀 Quick Start
-bash
-Copy
-Edit
+```bash
 git clone https://github.com/HCS412/local_llm_runner.git
 cd local_llm_runner
-pip install -r requirements.txt
-streamlit run app.py
-🧠 Be sure to have a local LLM loaded via LM Studio or Ollama (e.g. TinyLLaMA, Mistral, Phi).
+pip install -e .
+```
 
-⚙️ Prompt Routing
-Type	Description
-simple	Short, factual prompts → direct LLM response
-full_pipeline	Deeper prompts → critique, personas, revisions
+## Setup
 
-Full Pipeline Stages:
-Initial generation
+mull works with any OpenAI-compatible local LLM server:
+- [LM Studio](https://lmstudio.ai/) (default: `http://localhost:1234/v1`)
+- [Ollama](https://ollama.ai/) (`http://localhost:11434/v1`)
+- llama.cpp server, vLLM, etc.
 
-Reasoning critique
+Configure via environment variables:
 
-Persona reframing
+```bash
+export MULL_API_BASE=http://localhost:1234/v1
+export MULL_MODEL=llama3
+```
 
-Answer revision
+Or copy `.env.example` to `.env` and edit it.
 
-Meta-summary
+## Usage
 
-Follow-up suggestions
+```bash
+# Basic - shows refined answer only
+mull "Should I quit my job to start a company?"
 
-Markdown log output
+# Verbose - shows all thinking steps
+mull -v "What's the best way to give difficult feedback?"
 
-📁 Directory Overview
-bash
-Copy
-Edit
-├── app.py                     # Streamlit frontend
-├── main.py                    # CLI runner
-├── utils/
-│   ├── prompt_router.py       # Pipeline decision logic
-│   ├── prompt_classifier.py   # Smart classification engine
-│   ├── dynamic_persona_router.py # Persona selection system
-│   ├── formatting.py          # Markdown cleanup
-├── logs/                      # Markdown logs
-├── requirements.txt
-└── README.md
-🧠 Config Tips
-🎭 Add more personas in dynamic_persona_router.py
+# Pipe input
+echo "How do I handle a difficult conversation?" | mull
+```
 
-⚡ Run smaller models for speed, or swap for custom ones
+## The principles
 
-🔄 Easily plug in sentence embeddings or OpenAI fallback
+mull's critique is guided by built-in "outsider principles":
 
-🪞 Use markdown logs to analyze model behavior over time
+- Truth over comfort, especially when comfort belongs to the powerful
+- Honor ambiguity - life is not binary, nor should thought be
+- Cultural humility - never assume you see the whole story
+- Speak with soul, not just safety
+- Center the margins - not as charity, but as starting point
+- Do not speak over - reflect alongside
 
-🌐 Example Prompts
-bash
-Copy
-Edit
-python main.py "How can I launch a startup with no funding?"
-python main.py "Why do people follow controversial public figures?"
-python main.py "What should I teach my kids about race and AI?"
-🧭 Roadmap
- Side-by-side model comparisons (TinyLLaMA vs GPT-4)
+These give mull its distinctive voice: direct, honest, willing to sit with complexity.
 
- FastAPI server mode
+## Requirements
 
- Toggle personas per run
+- Python 3.9+
+- A local LLM server running
 
- Memory + prompt history
+## License
 
- External dataset reflection
-
- User-defined critique stages
-
-🤝 Contribute
-We welcome:
-
-🧠 Philosophers + prompt engineers
-
-👩‍🔧 Builders + model tinkerers
-
-🔬 Researchers on alignment, cognition, or bias
-
-🧩 Creative weirdos and systems thinkers
-
-Open a PR, issue, or idea.
-
-🪪 License
-MIT.
-Build. Remix. Learn. Reflect.
-Just don’t put it behind a paywall.
+MIT

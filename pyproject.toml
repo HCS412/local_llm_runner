@@ -1,15 +1,20 @@
 [project]
-name = "local-llm-runner"
+name = "mull"
 version = "0.1.0"
-description = "A self-reflective alignment pipeline using local open-source LLMs"
-authors = [
-  { name="Your Name", email="you@example.com" }
-]
+description = "A CLI thinking partner that critiques and refines its own responses"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = [
-  "requests"
+    "requests>=2.28",
+    "python-dotenv>=1.0",
 ]
 
 [project.scripts]
-llm-align = "local_llm_runner.main:run_pipeline"
+mull = "mull.cli:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["mull*"]
