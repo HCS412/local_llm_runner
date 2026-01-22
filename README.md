@@ -24,19 +24,21 @@ pip install -e .
 
 ## Setup
 
-mull works with any OpenAI-compatible local LLM server:
-- [LM Studio](https://lmstudio.ai/) (default: `http://localhost:1234/v1`)
-- [Ollama](https://ollama.ai/) (`http://localhost:11434/v1`)
-- llama.cpp server, vLLM, etc.
-
-Configure via environment variables:
+Start your local LLM server, then configure:
 
 ```bash
+# LM Studio (default)
 export MULL_API_BASE=http://localhost:1234/v1
+export MULL_MODEL=your-model-name
+
+# Ollama
+export MULL_API_BASE=http://localhost:11434/v1
 export MULL_MODEL=llama3
 ```
 
 Or copy `.env.example` to `.env` and edit it.
+
+Works with LM Studio, Ollama, llama.cpp server, vLLM, or any OpenAI-compatible API.
 
 ## Usage
 
